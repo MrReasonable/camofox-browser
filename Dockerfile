@@ -60,7 +60,16 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 COPY scripts/ ./scripts/
-RUN npm ci --omit=dev
+# better-sqlite3 (added in v1.13.1 for the persistence/MCP layer) is a native
+# module; when no prebuilt binary matches this Node/arch, npm ci compiles it
+# from source, which needs a C/C++ toolchain. Install build-essential just for
+# the build, then purge it so the runtime image stays lean.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential \
+    && npm ci --omit=dev \
+    && apt-get purge -y build-essential \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY server.js ./
 COPY camofox.config.json ./
