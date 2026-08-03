@@ -74,6 +74,10 @@ RUN apt-get update \
 COPY server.js ./
 COPY camofox.config.json ./
 COPY lib/ ./lib/
+# mcp/ holds shared .mjs modules that lib/ imports at load time (e.g.
+# lib/cookies.js -> ../mcp/lib/cookies.mjs). Added in v1.13.1; the Dockerfile
+# was never updated to ship it, so the persistence plugin fails to load without it.
+COPY mcp/ ./mcp/
 COPY plugins/ ./plugins/
 COPY scripts/ ./scripts/
 
